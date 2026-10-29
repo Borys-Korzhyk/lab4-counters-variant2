@@ -1,6 +1,6 @@
-(* Самостійне завдання. Запускати як окрему циклічну програму.
-   Cscape: VAR - таблиця змінних; тіло - ST-блок.
-   5 деталей у контейнері, 3 контейнери за зміну, пауза 3000 мс. *)
+(* Independent assignment. Run as a separate cyclic program.
+   Cscape Enhanced IEC: declarations in the variable table; body in ST.
+   Five parts per container, three containers per shift, 3000 ms pause. *)
 PROGRAM TwoStage
 VAR
     startConveyor : BOOL := FALSE;
@@ -40,13 +40,13 @@ ELSIF startEdge.Q AND NOT shiftComplete THEN
     runRequested := TRUE;
 END_IF;
 
-(* Під час паузи та після завершення зміни деталі не рахуються. *)
+(* Ignore sensor events during pauses and after shift completion. *)
 motorRunning := runRequested AND NOT pauseActive
                 AND NOT shiftComplete AND NOT resetAll
                 AND NOT stopConveyor;
 counter1(sensorEdge.Q AND motorRunning, resetParts, 5);
 
-(* Тривале Q першого лічильника дає лише один контейнер. *)
+(* Count exactly one container for each rising edge of counter1.Q. *)
 containerEdge(counter1.Q);
 counter2(containerEdge.Q AND NOT resetAll, resetAll, 3);
 currentParts := counter1.CV;
@@ -57,7 +57,7 @@ IF containerEdge.Q AND NOT shiftComplete AND NOT resetAll THEN
     pauseActive := TRUE;
 END_IF;
 
-(* TON1ms має числовий PT у мілісекундах. *)
+(* TON1ms uses a numeric preset in milliseconds. *)
 pauseTimer(pauseActive AND NOT resetAll, 3000);
 IF pauseTimer.Q THEN
     pauseActive := FALSE;
@@ -69,7 +69,7 @@ IF shiftComplete THEN
     pauseActive := FALSE;
 END_IF;
 
-(* Не дозволяємо рух до скидання першого лічильника. *)
+(* Keep the motor stopped until counter1 has been reset. *)
 motorRunning := runRequested AND NOT pauseActive
                 AND NOT shiftComplete AND NOT resetAll
                 AND NOT stopConveyor AND NOT resetPartsNext;

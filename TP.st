@@ -1,6 +1,5 @@
-(* Користувацький імпульсний ФБ на основі TON1ms.
-   Необхідні змінні створюються у секціях входів, виходів
-   і локальних змінних UDFB TP у Cscape. *)
+(* Custom pulse function block based on TON1ms.
+   Create inputs, outputs and local variables in the Cscape UDFB editor. *)
 FUNCTION_BLOCK TP
 VAR_INPUT
     IN : BOOL;

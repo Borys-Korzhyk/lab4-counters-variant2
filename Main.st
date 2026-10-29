@@ -1,6 +1,5 @@
-(* ЛР 4. Коржик Борис. Варіант 2. Cscape, Structured Text.
-   У Cscape оголошення VAR перенести до таблиці змінних,
-   а тіло програми - до циклічного ST-блока Main. *)
+(* Lab 4. Borys Korzhyk. Variant 2. Cscape Enhanced IEC, ST.
+   Enter VAR declarations in the variable table and the body in a cyclic ST block. *)
 PROGRAM Main
 VAR
     startConveyor : BOOL := FALSE;
@@ -19,30 +18,29 @@ VAR
     partCounter   : CTD;
 END_VAR
 
-(* Фронт реального датчика відстежується навіть під час зупинки.
-   Тому Пуск при вже активному датчику не створює нову деталь.
-   У Cscape CTD не має власного детектора фронту. *)
+(* Track raw sensor edges even while stopped.
+   A sensor held high at Start must not count as a new part.
+   Cscape CTD requires an external edge detector. *)
 sensorEdge(sensorPulse);
 startEdge(startConveyor);
 loadCounter := resetCounter OR NOT initialized;
 
-(* Reset завантажує 20 і залишає двигун вимкненим.
-   Stop має пріоритет над Start. Пуск виконується новим натисканням. *)
+(* Reset loads 20 and stops the motor.
+   Stop has priority; Start requires a new button press. *)
 IF loadCounter OR stopConveyor THEN
     motorRunning := FALSE;
 ELSIF startEdge.Q AND NOT batchComplete THEN
     motorRunning := TRUE;
 END_IF;
 
-(* CD = один цикл сканування на одну деталь.
-   Позиційні параметри CTD: CD, LOAD, PV. *)
+(* CD is TRUE for one scan per part. Parameters: CD, LOAD, PV. *)
 partCounter(sensorEdge.Q AND motorRunning AND NOT loadCounter,
             loadCounter, setPoint);
 currentCount := partCounter.CV;
 processedCount := setPoint - currentCount;
 batchComplete := partCounter.Q;
 
-(* На двадцятій деталі зупинка відбувається у цьому ж циклі. *)
+(* Stop in the same scan as the twentieth part. *)
 IF batchComplete OR stopConveyor OR loadCounter THEN
     motorRunning := FALSE;
 END_IF;
